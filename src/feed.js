@@ -1,12 +1,17 @@
 import React from 'react';
 import axios from 'axios';
-
+import Loader from './loading'
+;
 
 export default class Feed extends React.Component{
     constructor(props){
     super(props)
         this.state={
             products:[],
+            loading:true,
+            // totalItems=0,
+            // totalValue =0
+            
             
 
         }
@@ -14,6 +19,7 @@ export default class Feed extends React.Component{
     }
 
     componentDidMount(){
+        //getting products
         axios.get('https://api.chec.io/v1/products',{
             params:{
                 limit: "25"
@@ -24,30 +30,56 @@ export default class Feed extends React.Component{
         }).then((response) =>{
             console.log(response)
             this.setState({
-                products:response.data.data
+                products:response.data.data,
+                loading:false
                 
               });
 
-        }).catch((response) =>{
-            
-
+        }).catch((error) =>{
+            console.log(error)
         })
         
-    }
+    }   
     render(){
+        
+        const{ products,loading,} = this.state;
         return(
             <div>
-                <div>content</div>
-                <div className="card" style={{width: "18rem"}}>
-                <img src="" className="card-img-top" alt="..." />
-                <div className="card-body">
-                <h5 className="card-title">Card title</h5>
-                <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
+                {
+                loading ? (<Loader/>):null }
+                <div>
+                <button type="button" class="btn btn-primary">
+                Profile <span class="badge badge-light">9</span>
+                <span class="sr-only">unread messages</span>
+                </button>
                 </div>
-                </div>
-            </div>
+                
+                    <div style={{display:"flex",flexWrap:"wrap"}}>
+                    {
+                        products.map((product) => {
+                            return(
+                                <div>
+                                <div className="card" style={{width: "18rem",height:"500px",padding:"4px"}}>
+                                <img style={{height:"140px"}}src={product.media.source} className="card-img-top" alt="..." />
+                                <div className="card-body">
+                            <h5 className="card-title">{product.name}</h5>
+                                <p className="card-text"  dangerouslySetInnerHTML={{__html: product.description}}></p>
+                                <div>
+                                    <span className="badge badge-success price">{product.price.formatted_with_symbol}</span>
+                                </div>
+                                <button className="btn btn-primary"onClick={() => { this.addItemToCart(product.id) }}>Add to cart</button>
+                                </div>
+                            
+                            </div>
+                            </div>
+                    
+                            )
+                        })
+                        
+                    }
+                    </div>
+            </div>        
         )
-    }
-    
+        
+    }    
 }
